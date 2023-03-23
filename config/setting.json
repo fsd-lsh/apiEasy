@@ -1,0 +1,7 @@
+{
+    "mode": "restful",
+    "listen": 9000,
+    "headers": {
+        "X-Power-By": "nodePoem"
+    }
+}
