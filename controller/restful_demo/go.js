@@ -13,7 +13,8 @@ export class go extends Controller {
         this.ajax(1, 'get', res);
     }
 
-    async post() {
+    async post(request) {
+        //console.log(request)
         this.ajax(1, 'post');
     }
 

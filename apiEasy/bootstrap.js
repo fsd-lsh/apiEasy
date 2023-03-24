@@ -1,6 +1,7 @@
 import Koa from "koa";
 import Router from "@koa/router";
-import session from "koa-session";
+import Session from "koa-session";
+import BodyParser from "koa-bodyparser";
 
 const app = new Koa();
 const router = new Router();
@@ -11,7 +12,8 @@ export class Bootstrap {
         this.routerCnf = routerCnf;
         this.settingCnf = settingCnf;
         this.sessionCnf = sessionCnf;
-        app.use(session(this.sessionCnf, app))
+        app.use(BodyParser());
+        app.use(Session(this.sessionCnf, app));
     }
 
     rpc(both) {
@@ -23,7 +25,7 @@ export class Bootstrap {
                 const className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
                 const funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
                 const controller =  await import(`../controller${controllerPath}.js`);
-                await (new controller[className](ctx))[funcName]();
+                await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
             });
         }
         if(!both) {
@@ -41,7 +43,7 @@ export class Bootstrap {
                     method = (method === '/') ? 'index' : method;
                     const controller =  await import(`../controller${urlPath}.js`);
                     const className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
-                    await (new controller[className](ctx))[method]();
+                    await (new controller[className](ctx))[method](this.paramsFormat(ctx));
                 });
             }
         }
@@ -61,6 +63,14 @@ export class Bootstrap {
             return url.slice(0, url.indexOf('?'));
         }else {
             return url;
+        }
+    }
+
+    paramsFormat(ctx) {
+        return {
+            query: ctx.request.query,
+            body: ctx.request.body,
+            merge: Object.assign(ctx.request.query, ctx.request.body),
         }
     }
 
