@@ -1,14 +1,17 @@
 import Koa from "koa";
 import Router from "@koa/router";
+import session from "koa-session";
 
 const app = new Koa();
 const router = new Router();
 
-export class Routers {
+export class Bootstrap {
 
-    constructor(routerCnf, settingCnf) {
+    constructor({routerCnf, settingCnf, sessionCnf}) {
         this.routerCnf = routerCnf;
         this.settingCnf = settingCnf;
+        this.sessionCnf = sessionCnf;
+        app.use(session(this.sessionCnf, app))
     }
 
     rpc() {
@@ -41,9 +44,9 @@ export class Routers {
     }
 
     run() {
-        app
-            .use(router.routes())
-            .use(router.allowedMethods());
+        app.keys = ['apiEasy'];
+        app.use(router.routes())
+           .use(router.allowedMethods());
         app.listen(this.settingCnf.listen);
     }
 }

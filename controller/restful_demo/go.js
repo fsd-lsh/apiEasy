@@ -5,11 +5,12 @@ export class go extends Controller {
 
     constructor(ctx) {
         super(ctx);
+        this.ctx = ctx;
     }
 
     async get() {
         let res = await (new Hi()).getAll();
-        this.ajax(1, 'ok', res);
+        this.ajax(1, 'get', res);
     }
 
     async post() {

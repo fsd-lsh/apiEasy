@@ -1,10 +1,12 @@
 import Jsonfile from "jsonfile";
-import {Routers} from "./apiEasy/routers.js";
+import {Bootstrap} from "./apiEasy/bootstrap.js";
 
 const routerCnf = Jsonfile.readFileSync('config/router.json');
 const settingCnf = Jsonfile.readFileSync('config/setting.json');
+const sessionCnf = Jsonfile.readFileSync('config/session.json');
 
-(new Routers(
+(new Bootstrap({
     routerCnf,
-    settingCnf
-))[settingCnf.mode]();
+    settingCnf,
+    sessionCnf,
+}))[settingCnf.mode]();
