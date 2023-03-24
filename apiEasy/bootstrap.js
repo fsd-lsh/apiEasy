@@ -14,33 +14,54 @@ export class Bootstrap {
         app.use(session(this.sessionCnf, app))
     }
 
-    rpc() {
-
+    rpc(both) {
+        this.settingCnf.mode = both ? 'rpc' : this.settingCnf.mode;
+        for (let routePath of this.routerCnf[this.settingCnf.mode]) {
+            router.all(routePath, async (ctx, next) => {
+                const urlPath = this.urlParse(ctx.originalUrl);
+                const controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
+                const className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
+                const funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
+                const controller =  await import(`../controller${controllerPath}.js`);
+                await (new controller[className](ctx))[funcName]();
+            });
+        }
+        if(!both) {
+            this.run();
+        }
     }
 
-    restful() {
+    restful(both) {
+        this.settingCnf.mode = both ? 'restful' : this.settingCnf.mode;
         for (let method in this.routerCnf[this.settingCnf.mode]) {
             for (let routePath in this.routerCnf[this.settingCnf.mode][method]) {
                 router[method](routePath, async (ctx, next) => {
-                    let urlPathArr;
-                    if(ctx.originalUrl.indexOf('?') !== -1) {
-                        urlPathArr = ctx.originalUrl.slice(0, ctx.originalUrl.indexOf('?'));
-                    }else {
-                        urlPathArr = ctx.originalUrl;
-                    }
+                    const urlPath = this.urlParse(ctx.originalUrl);
                     await ctx.set(this.settingCnf.headers);
                     method = (method === '/') ? 'index' : method;
-                    const controller =  await import(`../controller${urlPathArr}.js`);
-                    const className = urlPathArr.slice(urlPathArr.lastIndexOf('/')+1, urlPathArr.length);
+                    const controller =  await import(`../controller${urlPath}.js`);
+                    const className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
                     await (new controller[className](ctx))[method]();
                 });
             }
         }
-        this.run();
+        if(!both) {
+            this.run();
+        }
     }
 
     both() {
+        this.rpc(true);
+        this.restful(true);
+        this.run();
+    }
 
+    urlParse(url) {
+        if(url.indexOf('?') !== -1) {
+            return url.slice(0, url.indexOf('?'));
+        }else {
+            return url;
+        }
     }
 
     run() {

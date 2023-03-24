@@ -1,7 +1,8 @@
 {
-    "rpc": {
-
-    },
+    "rpc": [
+        "/rpc_demo/go/hi",
+        "/rpc_demo/go/fetch_some_data"
+    ],
     "restful": {
         "get": {
             "/restful_demo/go": []

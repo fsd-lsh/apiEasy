@@ -11,7 +11,7 @@ export class go extends Controller {
         this.ajax(1, 'ok');
     }
 
-    async fetchSomeData() {
+    async fetch_some_data() {
         let res = await (new Hi()).getAll();
         this.ajax(1, 'ok', res);
     }

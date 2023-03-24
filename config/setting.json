@@ -1,5 +1,6 @@
 {
-    "mode": "restful",
+    "mode": "both",
+    "debug": true,
     "listen": 9000,
     "headers": {
         "X-Power-By": "ApiEasy"
