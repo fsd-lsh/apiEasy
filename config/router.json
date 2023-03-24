@@ -1,15 +1,19 @@
 {
-    "rpc": {},
+    "rpc": {
+
+    },
     "restful": {
         "get": {
-            "/": [],
-            "/admin/index": [],
-            "/admin/go": []
+            "/restful_demo/go": []
         },
         "post": {
-            "/": []
+            "/restful_demo/go": []
         },
-        "put": {},
-        "delete": {}
+        "put": {
+            "/restful_demo/go": []
+        },
+        "delete": {
+            "/restful_demo/go": []
+        }
     }
 }

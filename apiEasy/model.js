@@ -12,7 +12,7 @@ export class Model {
                 cnf.password,
                 cnf.options,
             );
-            this.sequelize.authenticate();
+            //this.sequelize.authenticate();
             this.obj = this.sequelize.define(table, struct);
             console.log('Connection has been established successfully.');
         } catch (error) {
