@@ -9,4 +9,8 @@ node index.js
 ```
 
 ### Doc
-https://github.com/koajs/session#readme
+https://www.npmjs.com/package/koa
+https://www.npmjs.com/package/@koa/router
+https://www.npmjs.com/package/koa-bodyparser
+https://github.com/koajs/session
+https://www.npmjs.com/package/sequelize

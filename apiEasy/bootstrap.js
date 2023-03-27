@@ -2,6 +2,7 @@ import Koa from "koa";
 import Router from "@koa/router";
 import Session from "koa-session";
 import BodyParser from "koa-bodyparser";
+import func from "./funcs.js";
 
 const app = new Koa();
 const router = new Router();
@@ -20,12 +21,14 @@ export class Bootstrap {
         this.settingCnf.mode = both ? 'rpc' : this.settingCnf.mode;
         for (let routePath of this.routerCnf[this.settingCnf.mode]) {
             router.all(routePath, async (ctx, next) => {
+                await ctx.set(this.settingCnf.headers);
                 const urlPath = this.urlParse(ctx.originalUrl);
                 const controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
                 const className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
                 const funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
                 const controller =  await import(`../controller${controllerPath}.js`);
-                await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
+                const obj = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
+                this.autoResponse(ctx, obj);
             });
         }
         if(!both) {
@@ -38,12 +41,13 @@ export class Bootstrap {
         for (let method in this.routerCnf[this.settingCnf.mode]) {
             for (let routePath in this.routerCnf[this.settingCnf.mode][method]) {
                 router[method](routePath, async (ctx, next) => {
-                    const urlPath = this.urlParse(ctx.originalUrl);
                     await ctx.set(this.settingCnf.headers);
+                    const urlPath = this.urlParse(ctx.originalUrl);
                     method = (method === '/') ? 'index' : method;
                     const controller =  await import(`../controller${urlPath}.js`);
                     const className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
-                    await (new controller[className](ctx))[method](this.paramsFormat(ctx));
+                    const obj = await (new controller[className](ctx))[method](this.paramsFormat(ctx));
+                    this.autoResponse(ctx, obj);
                 });
             }
         }
@@ -74,10 +78,21 @@ export class Bootstrap {
         }
     }
 
+    autoResponse(ctx, obj) {
+        if(obj) {
+            if(obj.length) {
+                func.ajax(ctx, 1, 'ok', obj);
+            }else {
+                func.ajax(ctx, 0, 'fail', obj);
+            }
+        }
+    }
+
     run() {
         app.keys = ['apiEasy'];
         app.use(router.routes())
            .use(router.allowedMethods());
         app.listen(this.settingCnf.listen);
+        console.log(`Service running at http://localhost:${this.settingCnf.listen}`);
     }
 }

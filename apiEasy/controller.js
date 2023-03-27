@@ -1,7 +1,5 @@
 import {Session} from "./session.js";
-import Jsonfile from "jsonfile";
-
-const settingCnf = Jsonfile.readFileSync('config/setting.json');
+import func from "./funcs.js";
 
 export class Controller {
 
@@ -12,16 +10,7 @@ export class Controller {
     }
 
     ajax(code, info, data) {
-        this.ctx.body = {
-            code: Number(code),
-            info: info ? info : '',
-            data: data ? data : [],
-        }
-        if(settingCnf.debug) {
-            Object.assign(this.ctx.body, {
-                runtime: (new Date().getTime()) - (global['apiEasy']) + 'ms',
-            });
-        }
+        func.ajax(this.ctx, code, info, data);
     }
 
     session(key, value) {

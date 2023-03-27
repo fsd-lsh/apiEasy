@@ -8,7 +8,11 @@ export class go extends Controller {
     }
 
     hi() {
-        this.ajax(1, 'ok');
+        // Response mode 1
+        //this.ajax(1, 'ok', [{1: 2}]);
+
+        // Response mode 2
+        return [{1: 2}];
     }
 
     async fetch_some_data() {
