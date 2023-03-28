@@ -4,5 +4,16 @@
     "listen": 9000,
     "headers": {
         "X-Power-By": "ApiEasy"
+    },
+    "autoResponse": {
+        "enable": true,
+        "success": {
+            "code": 1,
+            "info": "ok"
+        },
+        "error": {
+            "code": 0,
+            "info": "fail"
+        }
     }
 }

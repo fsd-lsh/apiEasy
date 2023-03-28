@@ -78,12 +78,22 @@ export class Bootstrap {
         }
     }
 
-    autoResponse(ctx, obj) {
-        if(obj) {
-            if(obj.length) {
-                func.ajax(ctx, 1, 'ok', obj);
+    autoResponse(ctx, data) {
+        if(data && this.settingCnf.autoResponse.enable) {
+            if(data.length) {
+                func.ajax(
+                    ctx,
+                    this.settingCnf.autoResponse.success.code,
+                    this.settingCnf.autoResponse.success.info,
+                    data
+                );
             }else {
-                func.ajax(ctx, 0, 'fail', obj);
+                func.ajax(
+                    ctx,
+                    this.settingCnf.autoResponse.error.code,
+                    this.settingCnf.autoResponse.error.info,
+                    data
+                );
             }
         }
     }
