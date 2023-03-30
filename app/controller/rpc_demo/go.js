@@ -1,4 +1,4 @@
-import {Controller} from "../../apiEasy/controller.js";
+import {Controller} from "../../../apiEasy/controller.js";
 import {Hi} from "../../model/test/hi.js";
 
 export class go extends Controller {

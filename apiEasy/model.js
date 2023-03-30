@@ -1,11 +1,13 @@
 import {Sequelize} from "sequelize";
-import Jsonfile from "jsonfile";
+import Jsonfile from "jsonfile"
+import func from "../apiEasy/funcs.js";
 
 export class Model {
 
     constructor(table, struct) {
         try {
-            const cnf = Jsonfile.readFileSync('config/database.json');
+            const projectFlag = func.projectFlag();
+            const cnf = Jsonfile.readFileSync(`${global.apiEasyRoot}/${projectFlag}/config/database.json`);
             this.sequelize = new Sequelize(
                 cnf.database,
                 cnf.username,

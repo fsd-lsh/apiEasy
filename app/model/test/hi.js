@@ -1,4 +1,4 @@
-import {Model} from "../../apiEasy/model.js";
+import {Model} from "../../../apiEasy/model.js";
 import {DataTypes} from "sequelize";
 
 export class Hi extends Model {

@@ -9,10 +9,11 @@ const router = new Router();
 
 export class Bootstrap {
 
-    constructor({routerCnf, settingCnf, sessionCnf}) {
-        this.routerCnf = routerCnf;
-        this.settingCnf = settingCnf;
-        this.sessionCnf = sessionCnf;
+    constructor(projectFlag) {
+        this.projectFlag = projectFlag;
+        this.routerCnf = global.routerCnf;
+        this.settingCnf = global.settingCnf;
+        this.sessionCnf = global.sessionCnf;
         app.use(BodyParser());
         app.use(Session(this.sessionCnf, app));
     }
@@ -26,9 +27,9 @@ export class Bootstrap {
                 const controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
                 const className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
                 const funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
-                const controller =  await import(`../controller${controllerPath}.js`);
-                const obj = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
-                this.autoResponse(ctx, obj);
+                const controller =  await import(`../${this.projectFlag}/controller${controllerPath}.js`);
+                const data = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
+                this.autoResponse(ctx, data);
             });
         }
         if(!both) {
@@ -44,10 +45,10 @@ export class Bootstrap {
                     await ctx.set(this.settingCnf.headers);
                     const urlPath = this.urlParse(ctx.originalUrl);
                     method = (method === '/') ? 'index' : method;
-                    const controller =  await import(`../controller${urlPath}.js`);
+                    const controller =  await import(`../${this.projectFlag}/controller${urlPath}.js`);
                     const className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
-                    const obj = await (new controller[className](ctx))[method](this.paramsFormat(ctx));
-                    this.autoResponse(ctx, obj);
+                    const data = await (new controller[className](ctx))[method](this.paramsFormat(ctx));
+                    this.autoResponse(ctx, data);
                 });
             }
         }

@@ -1,8 +1,5 @@
-import Jsonfile from "jsonfile";
-
-const settingCnf = Jsonfile.readFileSync('config/setting.json');
-
 export default {
+
     ajax(ctx, code, info, data) {
         let body = {
             code: Number(code),
@@ -12,10 +9,15 @@ export default {
             body.data = data;
         }
         ctx.body = body;
-        if(settingCnf.debug) {
+        if(global.settingCnf.debug) {
             Object.assign(ctx.body, {
                 runtime: (new Date().getTime()) - (global['apiEasy']) + 'ms',
             });
         }
-    }
+    },
+
+    projectFlag() {
+        let temp = process.argv[1].slice(0, process.argv[1].lastIndexOf('/'));
+        return temp.slice(temp.lastIndexOf('/')+1, process.argv[1].lastIndexOf('/'))
+    },
 }

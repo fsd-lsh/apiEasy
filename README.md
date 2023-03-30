@@ -5,7 +5,7 @@ A simple development api scaffolding based on node.js
 ```shell
 nvm use 17
 npm install
-node index.js
+npm run app
 ```
 
 ### Doc
