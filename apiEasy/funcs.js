@@ -1,7 +1,7 @@
 export default {
 
-    ajax(ctx, code, info, data) {
-        let body = {
+    ajax(ctx, code, info, data, startTime) {
+        let body = { 
             code: Number(code),
             info: info ? info : '',
         }
@@ -9,9 +9,9 @@ export default {
             body.data = data;
         }
         ctx.body = body;
-        if(global.settingCnf.debug) {
+        if(global.settingCnf.debug && startTime) {
             Object.assign(ctx.body, {
-                runtime: (new Date().getTime()) - (global['apiEasy']) + 'ms',
+                runtime: (new Date().getTime()) - startTime + 'ms',
             });
         }
     },

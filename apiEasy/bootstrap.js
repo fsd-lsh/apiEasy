@@ -34,14 +34,36 @@ export class Bootstrap {
     }
 
     precompileRoute(routePath, method = 'all') {
-        const urlPath = routePath === '/' ? '/index' : routePath;
-        let controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
-        let className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
-        let funcName = method === 'all' ? urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length) : method;
+        if (routePath === '/') {
+            return {
+                controllerPath: '/index',
+                className: 'index',
+                funcName: 'index'
+            };
+        }
+        const normalizedPath = routePath.replace(/\/$/, '');
+        const segments = normalizedPath.split('/').filter(Boolean);
         
-        if (!controllerPath) controllerPath = '/index';
-        if (!className) className = 'index';
-        if (!funcName || funcName === '/') funcName = 'index';
+        let controllerPath, className, funcName;
+        if (segments.length === 3) {
+            controllerPath = `/${segments[0]}/${segments[1]}`;
+            className = segments[1];
+            funcName = method === 'all' ? segments[2] : method;
+        } else if (segments.length === 2) {
+            controllerPath = `/${segments[0]}/${segments[1]}`;
+            className = segments[1];
+            funcName = method === 'all' ? 'index' : method;
+        } else if (segments.length === 1) {
+            controllerPath = `/${segments[0]}`;
+            className = segments[0];
+            funcName = method === 'all' ? 'index' : method;
+        } else {
+            return {
+                controllerPath: '/index',
+                className: 'index',
+                funcName: 'index'
+            };
+        }
         
         return {
             controllerPath,
@@ -58,8 +80,9 @@ export class Bootstrap {
                 await ctx.set(this.settingCnf.headers);
                 const { controllerPath, className, funcName } = routeInfo;
                 const controller = await this.getController(controllerPath);
-                const data = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
-                this.autoResponse(ctx, data);
+                const controllerInstance = new controller[className](ctx);
+                const data = await controllerInstance[funcName](this.paramsFormat(ctx));
+                this.autoResponse(ctx, data, controllerInstance.startTime);
             });
         }
         if(!both) {
@@ -76,8 +99,9 @@ export class Bootstrap {
                     await ctx.set(this.settingCnf.headers);
                     const { controllerPath, className, funcName } = routeInfo;
                     const controller = await this.getController(controllerPath);
-                    const data = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
-                    this.autoResponse(ctx, data);
+                    const controllerInstance = new controller[className](ctx);
+                    const data = await controllerInstance[funcName](this.paramsFormat(ctx));
+                    this.autoResponse(ctx, data, controllerInstance.startTime);
                 });
             }
         }
@@ -100,10 +124,10 @@ export class Bootstrap {
         }
     }
 
-    autoResponse(ctx, data) {
+    autoResponse(ctx, data, startTime) {
         if(data && this.settingCnf.autoResponse.enable) {
             const hasContent = typeof data !== 'object' ? true : Array.isArray(data) ? data.length : Object.keys(data).length;
-            func.ajax(ctx, hasContent ? this.settingCnf.autoResponse.success.code : this.settingCnf.autoResponse.error.code, hasContent ? this.settingCnf.autoResponse.success.info : this.settingCnf.autoResponse.error.info, hasContent ? data : undefined);
+            func.ajax(ctx, hasContent ? this.settingCnf.autoResponse.success.code : this.settingCnf.autoResponse.error.code, hasContent ? this.settingCnf.autoResponse.success.info : this.settingCnf.autoResponse.error.info, hasContent ? data : undefined, startTime);
         }
     }
 
