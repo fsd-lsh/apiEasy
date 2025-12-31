@@ -1,5 +1,7 @@
 import Koa from "koa";
 import Router from "@koa/router";
+import Views from "koa-views";
+import Static from "koa-static";
 import Session from "koa-session";
 import BodyParser from "koa-bodyparser";
 import func from "./funcs.js";
@@ -16,6 +18,8 @@ export class Bootstrap {
         this.sessionCnf = global.sessionCnf;
         app.use(BodyParser());
         app.use(Session(this.sessionCnf, app));
+        app.use(Views(`${global.apiEasyRoot}/${this.projectFlag}/views/`, {extension: 'ejs'}));
+        app.use(Static(`${global.apiEasyRoot}/${this.projectFlag}/static/`));
     }
 
     rpc(both) {
@@ -23,10 +27,13 @@ export class Bootstrap {
         for (let routePath of this.routerCnf[this.settingCnf.mode]) {
             router.all(routePath, async (ctx, next) => {
                 await ctx.set(this.settingCnf.headers);
-                const urlPath = this.urlParse(ctx.originalUrl);
-                const controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
-                const className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
-                const funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
+                const urlPath = func.urlParse(ctx.originalUrl);
+                let controllerPath = urlPath.slice(0, urlPath.lastIndexOf('/'));
+                let className = controllerPath.slice(controllerPath.lastIndexOf('/')+1, controllerPath.length);
+                let funcName = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
+                if(!controllerPath) { controllerPath = '/index' }
+                if(!className) { className = 'index'; }
+                if(!funcName) { funcName = 'index'; }
                 const controller =  await import(`../${this.projectFlag}/controller${controllerPath}.js`);
                 const data = await (new controller[className](ctx))[funcName](this.paramsFormat(ctx));
                 this.autoResponse(ctx, data);
@@ -43,7 +50,7 @@ export class Bootstrap {
             for (let routePath in this.routerCnf[this.settingCnf.mode][method]) {
                 router[method](routePath, async (ctx, next) => {
                     await ctx.set(this.settingCnf.headers);
-                    const urlPath = this.urlParse(ctx.originalUrl);
+                    const urlPath = func.urlParse(ctx.originalUrl);
                     method = (method === '/') ? 'index' : method;
                     const controller =  await import(`../${this.projectFlag}/controller${urlPath}.js`);
                     const className = urlPath.slice(urlPath.lastIndexOf('/')+1, urlPath.length);
@@ -63,14 +70,6 @@ export class Bootstrap {
         this.run();
     }
 
-    urlParse(url) {
-        if(url.indexOf('?') !== -1) {
-            return url.slice(0, url.indexOf('?'));
-        }else {
-            return url;
-        }
-    }
-
     paramsFormat(ctx) {
         return {
             query: ctx.request.query,
@@ -81,7 +80,7 @@ export class Bootstrap {
 
     autoResponse(ctx, data) {
         if(data && this.settingCnf.autoResponse.enable) {
-            if(data.length) {
+            if(data.length || Object.values(data).length) {
                 func.ajax(
                     ctx,
                     this.settingCnf.autoResponse.success.code,
@@ -93,7 +92,6 @@ export class Bootstrap {
                     ctx,
                     this.settingCnf.autoResponse.error.code,
                     this.settingCnf.autoResponse.error.info,
-                    data
                 );
             }
         }
@@ -102,7 +100,7 @@ export class Bootstrap {
     run() {
         app.keys = ['apiEasy'];
         app.use(router.routes())
-           .use(router.allowedMethods());
+            .use(router.allowedMethods());
         app.listen(this.settingCnf.listen);
         console.log(`Service running at http://localhost:${this.settingCnf.listen}`);
     }

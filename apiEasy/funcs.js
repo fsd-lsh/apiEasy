@@ -5,7 +5,7 @@ export default {
             code: Number(code),
             info: info ? info : '',
         }
-        if(data.length) {
+        if(data && data[0] !== '') {
             body.data = data;
         }
         ctx.body = body;
@@ -20,4 +20,12 @@ export default {
         let temp = process.argv[1].slice(0, process.argv[1].lastIndexOf('/'));
         return temp.slice(temp.lastIndexOf('/')+1, process.argv[1].lastIndexOf('/'))
     },
+
+    urlParse(url) {
+        if(url.indexOf('?') !== -1) {
+            return url.slice(0, url.indexOf('?'));
+        }else {
+            return url;
+        }
+    }
 }

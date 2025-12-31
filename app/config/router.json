@@ -1,5 +1,6 @@
 {
     "rpc": [
+        "/",
         "/rpc_demo/go/hi",
         "/rpc_demo/go/fetch_some_data"
     ],
